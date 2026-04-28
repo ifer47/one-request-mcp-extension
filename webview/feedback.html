@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'none';
+    style-src 'unsafe-inline' https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com;
+    script-src 'unsafe-inline';
+    connect-src ws://127.0.0.1:{{PORT}};
+    img-src data:;">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root {
+  --bg: transparent;
+  --surface: var(--vscode-input-background, #1e1e2e);
+  --surface-2: var(--vscode-sideBar-background, #181825);
+  --border: var(--vscode-panel-border, #313244);
+  --border-focus: var(--vscode-focusBorder, #89b4fa);
+  --text: var(--vscode-foreground, #cdd6f4);
+  --text-bright: var(--vscode-editor-foreground, #cdd6f4);
+  --text-dim: var(--vscode-descriptionForeground, #6c7086);
+  --accent: var(--vscode-button-background, #89b4fa);
+  --accent-hover: var(--vscode-button-hoverBackground, #74c7ec);
+  --accent-fg: var(--vscode-button-foreground, #1e1e2e);
+  --success: #a6e3a1;
+  --success-dim: rgba(166,227,161,0.12);
+  --danger: #f38ba8;
+  --radius: 6px;
+  --radius-lg: 8px;
+  --font: 'Outfit', var(--vscode-font-family, system-ui, sans-serif);
+  --mono: 'JetBrains Mono', var(--vscode-editor-font-family, monospace);
+  --ease: cubic-bezier(.4,0,.2,1);
+}
+html,body { height:100%; }
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  font-size:12.5px;
+  line-height:1.5;
+  padding:8px;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ── Header ── */
+.hdr {
+  display:flex; align-items:center; gap:6px;
+  padding-bottom:8px; margin-bottom:8px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--text-dim);
+  transition: background .3s, box-shadow .3s;
+}
+.dot.ok {
+  background:var(--success);
+  box-shadow:0 0 5px var(--success-dim);
+  animation: breathe 3s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:.5} }
+.hdr-title { font-weight:600; font-size:12px; color:var(--text-bright); flex:1; }
+.hdr-port {
+  font-family:var(--mono); font-size:10px; color:var(--text-dim);
+  background:var(--surface); padding:2px 5px; border-radius:3px;
+}
+
+/* ── Views ── */
+.view { display:none; flex:1; flex-direction:column; animation:fadeIn .25s var(--ease); }
+.view.on { display:flex; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Placeholder (wait/done) ── */
+.ph {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:10px; text-align:center;
+}
+.ph-icon {
+  width:40px; height:40px; border-radius:50%;
+  background:var(--surface); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; color:var(--text-dim);
+}
+.ph-text { color:var(--text-dim); font-size:11.5px; max-width:220px; }
+.spin { animation:spin 2.5s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* ── Summary ── */
+.summary {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:8px 10px;
+  margin-bottom:8px;
+  flex-shrink:0;
+}
+.lbl {
+  font-size:10px; font-weight:600; text-transform:uppercase;
+  letter-spacing:.05em; color:var(--text-dim); margin-bottom:4px;
+  display:flex; align-items:center; gap:4px;
+}
+.lbl svg { width:12px; height:12px; opacity:.5; }
+.s-body {
+  font-family:var(--mono); font-size:11.5px; line-height:1.55;
+  color:var(--text-bright); white-space:pre-wrap; word-break:break-word;
+  max-height:180px; overflow-y:auto;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+}
+.s-body::-webkit-scrollbar { width:4px; }
+.s-body::-webkit-scrollbar-track { background:transparent; }
+.s-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ── Textarea ── */
+.ta {
+  display:block; width:100%; flex:1; min-height:60px; resize:none;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:8px 10px;
+  color:var(--text-bright); font-family:var(--font); font-size:12px;
+  line-height:1.45; outline:none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.ta:focus {
+  border-color:var(--border-focus);
+  box-shadow:0 0 0 2px rgba(137,180,250,0.1);
+}
+.ta::placeholder { color:var(--text-dim); }
+
+/* ── Images ── */
+.imgs { margin-top:6px; flex-shrink:0; }
+.imgs-hint {
+  display:flex; align-items:center; gap:4px;
+  font-size:10.5px; color:var(--text-dim); margin-bottom:4px;
+}
+.imgs-hint kbd {
+  font-family:var(--mono); font-size:9.5px;
+  background:var(--surface); border:1px solid var(--border);
+  padding:0 3px; border-radius:2px; color:var(--text);
+}
+.ig { display:flex; flex-wrap:wrap; gap:5px; }
+.thumb {
+  position:relative; width:56px; height:56px;
+  border-radius:var(--radius); overflow:hidden;
+  border:1px solid var(--border); background:var(--surface);
+  animation: popIn .2s var(--ease);
+}
+@keyframes popIn { from{transform:scale(.6);opacity:0} to{transform:scale(1);opacity:1} }
+.thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.thumb .rm {
+  position:absolute; top:2px; right:2px;
+  width:14px; height:14px; border-radius:50%;
+  background:rgba(0,0,0,.6); color:#fff; border:none;
+  cursor:pointer; font-size:9px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .15s;
+}
+.thumb:hover .rm { opacity:1; }
+.thumb .rm:hover { background:var(--danger); }
+
+/* ── Drop overlay ── */
+.drop {
+  position:fixed; inset:0; z-index:99;
+  background:rgba(137,180,250,0.06);
+  border:2px dashed var(--accent);
+  display:none; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+.drop.show { display:flex; }
+.drop span {
+  background:var(--surface); padding:4px 12px;
+  border-radius:var(--radius); font-weight:600;
+  color:var(--accent); font-size:11px; border:1px solid var(--border);
+}
+
+/* ── Button ── */
+.btn {
+  display:flex; align-items:center; justify-content:center; gap:4px;
+  width:100%; padding:7px;
+  background:var(--accent); color:var(--accent-fg); border:none;
+  border-radius:var(--radius-lg);
+  font-family:var(--font); font-size:12px; font-weight:600;
+  cursor:pointer; margin-top:8px; flex-shrink:0;
+  transition: background .15s, transform 50ms;
+}
+.btn:hover:not(:disabled) { background:var(--accent-hover); }
+.btn:active:not(:disabled) { transform:scale(.98); }
+.btn:disabled { opacity:.4; cursor:not-allowed; }
+.btn kbd {
+  font-family:var(--mono); font-size:9.5px;
+  background:rgba(255,255,255,.15); padding:1px 4px; border-radius:2px;
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="dot" id="dot"></div>
+  <div class="hdr-title">OneRequest</div>
+  <div class="hdr-port">:{{PORT}}</div>
+</div>
+
+<!-- Waiting -->
+<div class="view on" id="vWait">
+  <div class="ph">
+    <div class="ph-icon spin">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 1v2.5m0 9V15m-4.95-10.95L4.82 5.82m6.36 6.36 1.77 1.77M1 8h2.5m9 0H15M3.05 12.95l1.77-1.77m6.36-6.36 1.77-1.77"/></svg>
+    </div>
+    <div class="ph-text">Waiting for AI...</div>
+  </div>
+</div>
+
+<!-- Active -->
+<div class="view" id="vActive">
+  <div class="summary">
+    <div class="lbl">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      AI Summary
+    </div>
+    <div class="s-body" id="sumText"></div>
+  </div>
+
+  <div class="lbl" style="margin-bottom:4px">Your Feedback</div>
+  <textarea class="ta" id="ta" placeholder="Type feedback here..."></textarea>
+
+  <div class="imgs">
+    <div class="imgs-hint"><span>Images:</span><kbd>Ctrl+V</kbd><span>or drag</span></div>
+    <div class="ig" id="ig"></div>
+  </div>
+
+  <button class="btn" id="sendBtn">Send <kbd>Ctrl ↵</kbd></button>
+</div>
+
+<!-- Submitted -->
+<div class="view" id="vDone">
+  <div class="ph">
+    <div class="ph-icon" style="border-color:var(--success);color:var(--success)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 4 6 11 3 8"/></svg>
+    </div>
+    <div class="ph-text" style="color:var(--success)">Sent! Waiting for AI...</div>
+  </div>
+</div>
+
+<div class="drop" id="dropOv"><span>Drop images</span></div>
+
+<script>
+(function(){
+  const WS_URL = 'ws://127.0.0.1:{{PORT}}';
+  const MAX_DIM = 2048;
+  const $ = id => document.getElementById(id);
+
+  const el = {
+    dot:$('dot'), vWait:$('vWait'), vActive:$('vActive'), vDone:$('vDone'),
+    sum:$('sumText'), ta:$('ta'), ig:$('ig'), btn:$('sendBtn'), drop:$('dropOv')
+  };
+
+  let ws=null, images=[], imgC=0, view='wait', reDelay=1000;
+
+  function show(v) {
+    view=v;
+    el.vWait.classList.toggle('on',v==='wait');
+    el.vActive.classList.toggle('on',v==='active');
+    el.vDone.classList.toggle('on',v==='done');
+    if(v==='active') el.ta.focus();
+  }
+
+  function connect() {
+    ws=new WebSocket(WS_URL);
+    ws.onopen=()=>{ el.dot.classList.add('ok'); reDelay=1000; };
+    ws.onclose=()=>{ el.dot.classList.remove('ok'); setTimeout(connect,reDelay); reDelay=Math.min(reDelay*1.5,8000); };
+    ws.onerror=()=>ws.close();
+    ws.onmessage=evt=>{
+      let m; try{m=JSON.parse(evt.data)}catch{return}
+      if(m.type==='summary'){
+        el.sum.textContent=m.data;
+        images=[];imgC=0;renderImgs();
+        el.ta.value='';
+        show('active');
+      } else if(m.type==='waiting') show('wait');
+      else if(m.type==='submitted') show('done');
+    };
+  }
+  connect();
+
+  function submit(){
+    if(view!=='active'||!ws||ws.readyState!==1)return;
+    ws.send(JSON.stringify({type:'feedback',data:{
+      text:el.ta.value.trim(),
+      images:images.map(i=>({data:i.data,mimeType:i.mime}))
+    }}));
+  }
+  el.btn.addEventListener('click',submit);
+  el.ta.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();submit();}});
+
+  function addFile(file){
+    if(!file.type.startsWith('image/'))return;
+    const r=new FileReader();
+    r.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        if(w>MAX_DIM||h>MAX_DIM){const s=MAX_DIM/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s);}
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        const u=c.toDataURL('image/png');
+        images.push({id:++imgC,data:u.split(',')[1],mime:'image/png',pv:u});
+        renderImgs();
+      };
+      img.src=r.result;
+    };
+    r.readAsDataURL(file);
+  }
+
+  window._rm=id=>{images=images.filter(i=>i.id!==id);renderImgs();};
+  function renderImgs(){
+    el.ig.innerHTML=images.map(i=>
+      '<div class="thumb"><img src="'+i.pv+'"><button class="rm" onclick="_rm('+i.id+')">&times;</button></div>'
+    ).join('');
+  }
+
+  document.addEventListener('paste',e=>{
+    if(view!=='active')return;
+    for(const it of e.clipboardData.items) if(it.type.startsWith('image/')){e.preventDefault();addFile(it.getAsFile());}
+  });
+
+  let dN=0;
+  document.addEventListener('dragenter',e=>{e.preventDefault();dN++;el.drop.classList.add('show');});
+  document.addEventListener('dragleave',e=>{e.preventDefault();if(--dN<=0){dN=0;el.drop.classList.remove('show');}});
+  document.addEventListener('dragover',e=>e.preventDefault());
+  document.addEventListener('drop',e=>{
+    e.preventDefault();dN=0;el.drop.classList.remove('show');
+    if(view!=='active')return;
+    for(const f of e.dataTransfer.files)addFile(f);
+  });
+})();
+</script>
+</body>
+</html>

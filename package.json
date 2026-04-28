@@ -1,0 +1,60 @@
+{
+  "name": "one-request-mcp-extension",
+  "displayName": "OneRequest",
+  "description": "In-editor sidebar panel for one-request-mcp — interact with AI directly inside Cursor without a browser window",
+  "version": "1.0.0",
+  "publisher": "onerequest",
+  "license": "MIT",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ifer47/one-request-mcp"
+  },
+  "homepage": "https://github.com/ifer47/one-request-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/ifer47/one-request-mcp/issues"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Other"],
+  "keywords": [
+    "mcp",
+    "cursor",
+    "ai",
+    "interactive",
+    "one-request"
+  ],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "onerequestSidebar",
+          "title": "OneRequest",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "onerequestSidebar": [
+        {
+          "type": "webview",
+          "id": "onerequest.panelView",
+          "name": "Panel"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "OneRequest",
+      "properties": {
+        "onerequest.port": {
+          "type": "number",
+          "default": 23198,
+          "description": "Port of the one-request-mcp server (must match --port flag in MCP config)"
+        }
+      }
+    }
+  }
+}
