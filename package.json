@@ -2,28 +2,35 @@
   "name": "one-request-mcp-extension",
   "displayName": "OneRequest",
   "description": "In-editor sidebar panel for one-request-mcp — interact with AI directly inside Cursor without a browser window",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "onerequest",
   "license": "MIT",
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ifer47/one-request-mcp"
+    "url": "https://github.com/ifer47/one-request-mcp-extension"
   },
-  "homepage": "https://github.com/ifer47/one-request-mcp#readme",
+  "homepage": "https://github.com/ifer47/one-request-mcp-extension#readme",
   "bugs": {
-    "url": "https://github.com/ifer47/one-request-mcp/issues"
+    "url": "https://github.com/ifer47/one-request-mcp-extension/issues"
+  },
+  "galleryBanner": {
+    "color": "#1a1a2e",
+    "theme": "dark"
   },
   "engines": {
     "vscode": "^1.80.0"
   },
-  "categories": ["Other"],
+  "categories": ["Machine Learning", "Other"],
   "keywords": [
     "mcp",
     "cursor",
     "ai",
     "interactive",
-    "one-request"
+    "one-request",
+    "model-context-protocol",
+    "sidebar",
+    "panel"
   ],
   "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",

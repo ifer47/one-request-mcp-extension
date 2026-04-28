@@ -1,5 +1,9 @@
 # OneRequest — Cursor Extension
 
+[![Version](https://img.shields.io/open-vsx/v/onerequest/one-request-mcp-extension)](https://open-vsx.org/extension/onerequest/one-request-mcp-extension)
+[![Downloads](https://img.shields.io/open-vsx/dt/onerequest/one-request-mcp-extension)](https://open-vsx.org/extension/onerequest/one-request-mcp-extension)
+[![License](https://img.shields.io/github/license/ifer47/one-request-mcp-extension)](https://github.com/ifer47/one-request-mcp-extension/blob/main/LICENSE)
+
 In-editor sidebar panel for [one-request-mcp](https://www.npmjs.com/package/one-request-mcp). Interact with AI directly inside Cursor — no browser window needed.
 
 ## Features
@@ -9,7 +13,7 @@ In-editor sidebar panel for [one-request-mcp](https://www.npmjs.com/package/one-
 - **Real-time sync** — WebSocket connection to the MCP server, instant updates
 - **Configurable port** — match whatever port your MCP server uses
 
-## Setup
+## Quick Start
 
 ### 1. Install the MCP server
 
@@ -65,6 +69,10 @@ You are ABSOLUTELY FORBIDDEN from ending a request on your own. The user will ma
 
 - [one-request-mcp](https://www.npmjs.com/package/one-request-mcp) running with `--port` and `--no-browser`
 - Cursor IDE
+
+## Related
+
+- [one-request-mcp](https://github.com/ifer47/one-request-mcp) — the MCP server
 
 ## License
 
